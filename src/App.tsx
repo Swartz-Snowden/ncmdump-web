@@ -3,6 +3,25 @@ import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
 
+import { dumpNcmFile } from './lib/ncmdump-browser';
+
+async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const { blob, filename, format, meta } = await dumpNcmFile(file);
+
+  // Download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  console.log('Decoded format:', format, 'Meta:', meta);
+}
+
 function App() {
   const [count, setCount] = useState(0);
 
@@ -17,7 +36,7 @@ function App() {
         </a>
       </div>
       <h1 className="text-3xl font-bold">ncmdump web</h1>
-      <input type="file" name="audio" id="audio" accept="audio/*" />
+      <input type="file" name="audio" id="audio" accept=".ncm" onChange={onFileChange} />
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
         <p>
